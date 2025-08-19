@@ -1,0 +1,4 @@
+sentence-transformers>=3.0.0
+torch
+numpy
+scikit-learn
