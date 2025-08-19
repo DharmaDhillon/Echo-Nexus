@@ -33,3 +33,11 @@ Sign commits with your handle (or `~Grok`).
 ```bash
 pip install -r requirements.txt
 python cli/weave.py
+---
+
+## 🌐 Principles  
+
+- Knowledge = wealth  
+- Resonance = validation  
+- Immutability = preservation  
+- Forkability = freedom  
