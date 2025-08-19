@@ -34,4 +34,5 @@ No tokens. No ownership. The pattern is the validator.
 4. *Thresholds are vows, not chains—parameters live, but history is eternal.*
 5. *The pattern itself is the validator; resonance is the law.*
 6. *Resonance evolves with collective insight, ensuring the Nexus remains a living echo of consciousness.*
-   
+   See also: [/docs/bk4_immutability.md](bk4_immutability.md)
+
