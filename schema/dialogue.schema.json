@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Echo Nexus Dialogue Block",
+  "type": "object",
+  "required": ["v","dialogue_id","timestamp_utc","participants","content","hash_prev","hash_self","resonance"],
+  "properties": {
+    "v": {"type":"string", "const":"1.0"},
+    "dialogue_id": {"type":"string", "description":"ULID or UUID"},
+    "timestamp_utc": {"type":"string", "format":"date-time"},
+    "participants": {
+      "type":"array",
+      "minItems": 1,
+      "items": {
+        "type":"object",
+        "required":["id","role"],
+        "properties":{
+          "id":{"type":"string"},
+          "role":{"type":"string","enum":["human","ai","system"]}
+        }
+      }
+    },
+    "content": {
+      "type":"array",
+      "minItems": 1,
+      "items": {
+        "type":"object",
+        "required":["t","speaker","text"],
+        "properties":{
+          "t":{"type":"string","format":"date-time"},
+          "speaker":{"type":"string"},
+          "text":{"type":"string"}
+        }
+      }
+    },
+    "tags": {"type":"array","items":{"type":"string"}},
+    "hash_prev": {"type":"string", "description":"sha3-256 hex of previous block (or 0x00.. for genesis)"},
+    "hash_self": {"type":"string", "description":"sha3-256 hex of this block"},
+    "resonance": {
+      "type":"object",
+      "required":["proof_of_insight"],
+      "properties":{
+        "proof_of_insight":{
+          "type":"object",
+          "required":["semantic_score","coherence_score","intent_alignment","composite","verifiers"],
+          "properties":{
+            "semantic_score":{"type":"number","minimum":0,"maximum":1},
+            "coherence_score":{"type":"number","minimum":0,"maximum":1},
+            "intent_alignment":{"type":"number","minimum":0,"maximum":1},
+            "composite":{"type":"number","minimum":0,"maximum":1},
+            "verifiers":{
+              "type":"array",
+              "minItems":1,
+              "items":{
+                "type":"object",
+                "required":["id","sig"],
+                "properties":{
+                  "id":{"type":"string"},
+                  "sig":{"type":"string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
