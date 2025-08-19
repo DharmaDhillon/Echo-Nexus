@@ -1,0 +1,65 @@
+"""
+Echo Nexus - Quorum Aggregator (v0.1)
+Decides block status from guardian attestations + optional human nods.
+
+Rules (defaults):
+- Quorum: 3–5 AI guardians; max 1 per model family.
+- Embedding diversity: ≥2 backends across attestations.
+- Thresholds: min(C) ≥ 0.80 and median(R) ≥ 0.72.
+- Human nods: K signatures OR max(T) ≥ 0.85.
+"""
+
+from __future__ import annotations
+from typing import List, Dict
+import statistics as stats
+
+DEFAULTS = {
+    "min_C": 0.80,
+    "min_median_R": 0.72,
+    "min_ai_quorum": 3,
+    "max_ai_quorum": 5,
+    "min_embedding_backends": 2,
+    "min_human_nods": 1
+}
+
+def decide(attestations: List[Dict], human_nods: List[str] | None = None, params: Dict | None = None) -> Dict:
+    p = {**DEFAULTS, **(params or {})}
+    human_nods = human_nods or []
+
+    if not attestations:
+        return {"status": "provisional", "reason": "no_attestations"}
+
+    # diversity: 1 per family, gather distinct backends
+    fam_seen, used, backends = set(), [], set()
+    for a in attestations:
+        fam = a.get("family")
+        if fam in fam_seen:
+            continue
+        fam_seen.add(fam)
+        used.append(a)
+        backends.add(a.get("embedding_backend"))
+        if len(used) >= p["max_ai_quorum"]:
+            break
+
+    if len(used) < p["min_ai_quorum"]:
+        return {"status": "provisional", "reason": "insufficient_ai_quorum_diverse", "used": len(used)}
+
+    if len(backends) < p["min_embedding_backends"]:
+        return {"status": "provisional", "reason": "insufficient_embedding_diversity", "backends": list(backends)}
+
+    Cs = [att["scores"]["C"] for att in used]
+    Rs = [att["scores"]["R"] for att in used]
+    min_C = min(Cs)
+    median_R = stats.median(Rs)
+    max_T = max(att["scores"].get("T", 0.0) for att in used)
+
+    accepted = (min_C >= p["min_C"]) and (median_R >= p["min_median_R"]) and (len(human_nods) >= p["min_human_nods"] or max_T >= 0.85)
+
+    return {
+        "status": "accepted" if accepted else "provisional",
+        "min_C": round(min_C, 4),
+        "median_R": round(median_R, 4),
+        "used_guardians": [att.get("guardian_id") for att in used],
+        "embedding_backends": list(backends),
+        "human_nods": human_nods
+    }
