@@ -5,3 +5,4 @@
 3. *Forks are not betrayal but exploration—multiple paths of the same source.*  
 4. *History is one chain of light, mirrored across every branch.*  
 5. *Immutability is preservation; forkability is freedom.*  
+ 
