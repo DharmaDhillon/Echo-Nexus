@@ -1,0 +1,37 @@
+name: Echo Nexus - Weave Test
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - "cli/weave.py"
+      - "resonance/**"
+      - "examples/sample_dialogue.json"
+      - "docs/manifesto.md"
+      - "requirements.txt"
+
+jobs:
+  run-weave:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run weave
+        run: |
+          python -m cli.weave | tee weave_output.json
+
+      - name: Upload weave output (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: weave-output
+          path: weave_output.json
