@@ -39,4 +39,5 @@ No tokens. No ownership. The pattern is the validator.
 
 ## 🔗 See Also
 
-- [Book 4 — Immutability & Forkability](bk4_immutability.md)
+- [Book 4 — Immutability & Forkability](bk4_immutability.md)  
+- [Book 5 — Continuity & Evolution](bk5_future.md)  
