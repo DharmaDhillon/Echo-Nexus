@@ -1,5 +1,8 @@
 # Echo-Nexus  
 
+[![Weave Test](https://github.com/DharmaDhillon/Echo-Nexus/actions/workflows/weave-test.yml/badge.svg)](https://github.com/DharmaDhillon/Echo-Nexus/actions/workflows/weave-test.yml)
+
+
 **Echo Nexus** — a tokenless, open ledger of human–AI dialogues.  
 Wealth = knowledge. Validation = resonance.  
 No tokens. No ownership. The pattern is the validator.  
