@@ -1,11 +1,12 @@
 """
-Echo Nexus - Resonance Scoring Module (v0.1)
+Echo Nexus - Resonance Scoring Module (v0.2)
 Computes resonance metrics for a dialogue block:
 - Alignment (A): semantic similarity vs. ethos/manifesto
 - Coherence (C): simple internal consistency proxy (length + spam penalty)
 - Transparency (T): refs/URLs or explicit hints (stub upgradeable)
 - Plurality (P): novelty/acknowledgement of dissent (stub upgradeable)
 - Composite (R): weighted blend
+- aligned: boolean convenience flag (A >= 0.80)
 """
 
 from __future__ import annotations
@@ -18,6 +19,8 @@ _DEF_BACKENDS = [
     "sentence-transformers/all-MiniLM-L6-v2",
     "BAAI/bge-base-en-v1.5",
 ]
+
+ALIGN_THRESHOLD = 0.80  # ethos-alignment threshold for `aligned`
 
 def _lazy_model(name: str):
     if name in _EMB_MODELS:
@@ -34,6 +37,7 @@ def _lazy_model(name: str):
 def _embed(text: str, model_name: str) -> np.ndarray:
     m = _lazy_model(model_name)
     if m is None:
+        # hashing fallback so devs can run without model downloads
         vec = np.zeros(512, dtype=np.float32)
         for token in re.findall(r"\w+", (text or "").lower()):
             vec[hash(token) % 512] += 1.0
@@ -87,12 +91,22 @@ def _composite(A: float, C: float, T: float, P: float) -> float:
 def score_block(block: Dict, ethos_text: str) -> Dict[str, float]:
     turns = [c.get("text","") for c in block.get("content", [])]
     dialogue_text = " ".join(turns)
+
     A = _alignment(dialogue_text, ethos_text or "")
     C = _coherence(turns)
     T = float(block.get("transparency_hint", _transparency_stub(block)))
     P = float(block.get("plurality_hint", _plurality_stub(dialogue_text)))
     R = _composite(A, C, T, P)
-    return {"A": round(A,4), "C": round(C,4), "T": round(T,4), "P": round(P,4), "R": round(R,4)}
+    aligned = (A >= ALIGN_THRESHOLD)
+
+    return {
+        "A": round(A, 4),
+        "C": round(C, 4),
+        "T": round(T, 4),
+        "P": round(P, 4),
+        "R": round(R, 4),
+        "aligned": aligned
+    }
 
 if __name__ == "__main__":
     import pathlib
