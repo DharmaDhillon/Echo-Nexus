@@ -40,7 +40,7 @@ def quick_alignment(text: str, ethos: str, threshold: float = 0.80):
     """
     Lightweight alignment check using sentence-transformers.
     Returns (similarity: float|None, is_ok: bool).
-    Falls back to allowing if model is unavailable.
+    Falls back to allowing if model is unavailable (so the CLI never blocks).
     """
     try:
         from sentence_transformers import SentenceTransformer, util
@@ -49,7 +49,6 @@ def quick_alignment(text: str, ethos: str, threshold: float = 0.80):
         sim = float(util.cos_sim(emb[0], emb[1]).cpu().numpy()[0][0])
         return sim, bool(sim >= threshold)
     except Exception:
-        # If embeddings aren't available here, don't block—full scorer will still run.
         return None, True
 
 # ------------------ IPFS pin ------------------
@@ -60,7 +59,7 @@ def pin_to_ipfs(obj_or_path):
     """
     try:
         import ipfshttpclient
-        client = ipfshttpclient.connect()  # default /dns/localhost/tcp/5001/http
+        client = ipfshttpclient.connect()  # default: /dns/localhost/tcp/5001/http
         if isinstance(obj_or_path, (str, Path)) and Path(obj_or_path).exists():
             res = client.add(str(obj_or_path))
             return res["Hash"]
@@ -96,14 +95,14 @@ if __name__ == "__main__":
     # 1) Build & validate payload
     block = build_block()
 
-    # 2) Quick alignment gate (non-blocking; just an early signal)
+    # 2) Quick alignment gate (non-blocking; early signal only)
     ethos = load_ethos()
     sim, ok = quick_alignment(dialogue_text(block), ethos, threshold=0.80)
 
     # 3) Full resonance scoring
     scores = score_block(block, ethos)
 
-    # 4) Optional IPFS pin
+    # 4) Optional IPFS pin (returns None if no daemon is running)
     cid = pin_to_ipfs(block)
 
     # 5) Output combined result
